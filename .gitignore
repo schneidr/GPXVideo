@@ -2,4 +2,5 @@ bin/*
 lib/*
 share/*
 pyvenv.cfg
+__pycache__/*
 *.gpx
