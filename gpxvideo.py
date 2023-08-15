@@ -1,8 +1,6 @@
 import argparse
-from gps_class import GPSVis
 import gpxpy
 import gpxpy.gpx
-from PIL import Image, ImageDraw
 import staticmaps
 import sys
 import tempfile
@@ -32,55 +30,46 @@ parser.add_argument('--maptype', choices=['transparent', 'osm'],
                     default='osm')
 args = parser.parse_args()
 
-def scale_to_img(lat_lon, startpos, h_w, points):
-    """
-    Conversion from latitude and longitude to the image pixels.
-    It is used for drawing the GPS records on the map image.
-    :param lat_lon: GPS record to draw (lat1, lon1).
-    :param h_w: Size of the map image (w, h).
-    :return: Tuple containing x and y coordinates to draw on map image.
-    """
-    # https://gamedev.stackexchange.com/questions/33441/how-to-convert-a-number-from-one-min-max-set-to-another-min-max-set/33445
-    old = (points[2], points[0])
-    new = (0, h_w[1])
-    y = ((lat_lon[0] - old[0]) * (new[1] - new[0]) / (old[1] - old[0])) + new[0]
-    old = (points[1], points[3])
-    new = (0, h_w[0])
-    x = ((lat_lon[1] - old[0]) * (new[1] - new[0]) / (old[1] - old[0])) + new[0]
-    # y must be reversed because the orientation of the image in the matplotlib.
-    # image - (0, 0) in upper left corner; coordinate system - (0, 0) in lower left corner
-    return track_x + int(x), track_y + int(y)
-    return track_x + int(x), track_y + h_w[1] - int(y)
-
 gpx_file = open(args.gpxfile.name, 'r')
 gpx = gpxpy.parse(gpx_file)
 
-tmpdirname = tempfile.TemporaryDirectory(prefix='gpx', suffix=args.gpxfile.name)
-print(tmpdirname)
+tmpdir = tempfile.TemporaryDirectory(prefix='gpx', suffix=args.gpxfile.name)
+print(tmpdir.name)
 
-context = staticmaps.Context()
+def write_image(line: list, filename: str, args):
+    context = staticmaps.Context()
 
-if args.maptype == 'transparent':
-    # background_image = Image.new("RGBA",(args.width,args.height), (0,0,0,0))
-    sys.exit('--maptype transparent not implemented yet')
-elif args.maptype == 'osm':
-    context.set_tile_provider(staticmaps.tile_provider_OSM)
-else:
-    sys.exit('invalid maptype')
+    if args.maptype == 'transparent':
+        sys.exit('--maptype transparent not implemented yet')
+    elif args.maptype == 'osm':
+        context.set_tile_provider(staticmaps.tile_provider_OSM)
+    else:
+        sys.exit('invalid maptype')
 
-if args.trackcolor == 'red':
-    color = (255, 0, 0)
-elif args.trackcolor == 'green':
-    color = (0, 255, 0)
-elif args.trackcolor == 'blue':
-    color = (0, 0, 255)
-else:
-    sys.exit('invalid trackcolor')
+    if args.trackcolor == 'red':
+        color = (255, 0, 0)
+    elif args.trackcolor == 'green':
+        color = (0, 255, 0)
+    elif args.trackcolor == 'blue':
+        color = (0, 0, 255)
+    else:
+        sys.exit('invalid trackcolor')
 
+    context.add_object(staticmaps.Line(points))
+
+    image = context.render_cairo(args.width, args.height)
+    image.write_to_png(filename)
+
+count: int = 0
 for track in gpx.tracks:
     for segment in track.segments:
-        line = [staticmaps.create_latlng(p.latitude, p.longitude) for p in segment.points]
-        context.add_object(staticmaps.Line(line))
+        points = []
+        for point in segment.points:
+            count += 1
+            latlng = staticmaps.create_latlng(point.latitude, point.longitude)
+            points.append(latlng)
+            if count > 1:
+                filename = "{0}/{1:06d}.png".format(tmpdir.name, count)
+                print(filename)
+                write_image(points, filename, args)
 
-image = context.render_cairo(args.width, args.height)
-image.write_to_png("test.png")
