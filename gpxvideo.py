@@ -1,6 +1,7 @@
 import argparse
 import gpxpy
 import gpxpy.gpx
+import s2sphere
 import staticmaps
 import sys
 import tempfile
@@ -36,7 +37,7 @@ gpx = gpxpy.parse(gpx_file)
 tmpdir = tempfile.TemporaryDirectory(prefix='gpx', suffix=args.gpxfile.name)
 print(tmpdir.name)
 
-def write_image(line: list, filename: str, args):
+def write_image(points: list, filename: str, bounds: s2sphere.LatLngRect, args):
     context = staticmaps.Context()
 
     if args.maptype == 'transparent':
@@ -55,6 +56,7 @@ def write_image(line: list, filename: str, args):
     else:
         sys.exit('invalid trackcolor')
 
+    context.add_bounds(bounds)
     context.add_object(staticmaps.Line(points))
 
     image = context.render_cairo(args.width, args.height)
@@ -63,6 +65,21 @@ def write_image(line: list, filename: str, args):
 count: int = 0
 for track in gpx.tracks:
     for segment in track.segments:
+        lat_min: float = 99
+        lng_min: float = 99
+        lat_max: float = -99
+        lng_max: float = -99
+        for point in segment.points:
+            if point.latitude < lat_min:
+                lat_min = point.latitude
+            if point.longitude < lng_min:
+                lng_min = point.longitude
+            if point.latitude > lat_max:
+                lat_max = point.latitude
+            if point.longitude > lng_max:
+                lng_max = point.longitude
+
+        bounds: s2sphere.LatLngRect = s2sphere.LatLngRect.from_point_pair(s2sphere.LatLng.from_degrees(lat_min, lng_min), s2sphere.LatLng.from_degrees(lat_max, lng_max))
         points = []
         for point in segment.points:
             count += 1
@@ -71,5 +88,5 @@ for track in gpx.tracks:
             if count > 1:
                 filename = "{0}/{1:06d}.png".format(tmpdir.name, count)
                 print(filename)
-                write_image(points, filename, args)
-
+                write_image(points, filename, bounds, args)
+            
