@@ -1,5 +1,6 @@
 gpxpy
 matplotlib
+moviepy
 numpy
 pandas
 pillow

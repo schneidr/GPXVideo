@@ -1,8 +1,11 @@
 import argparse
 import gpxpy
 import gpxpy.gpx
+import moviepy.video.io.ImageSequenceClip
+import os
 from progress.bar import Bar
 import s2sphere
+import shutil
 import staticmaps
 import sys
 import tempfile
@@ -82,6 +85,7 @@ for track in gpx.tracks:
 
         bounds: s2sphere.LatLngRect = s2sphere.LatLngRect.from_point_pair(s2sphere.LatLng.from_degrees(lat_min, lng_min), s2sphere.LatLng.from_degrees(lat_max, lng_max))
         points = []
+        ## TODO: Change to proglog
         bar = Bar('creating images', max=len(segment.points))
         for point in segment.points:
             count += 1
@@ -92,4 +96,9 @@ for track in gpx.tracks:
                 write_image(points, filename, bounds, args)
             bar.next()
         bar.finish()
-            
+        image_files = [os.path.join(tmpdir.name,img)
+               for img in os.listdir(tmpdir.name)
+               if img.endswith(".png")]
+        clip = moviepy.video.io.ImageSequenceClip.ImageSequenceClip(image_files, fps=args.fps)
+        clip.write_videofile("{0}.mp4".format(args.gpxfile.name), logger='bar')
+        shutil.rmtree(tmpdir.name)
