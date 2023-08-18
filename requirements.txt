@@ -3,4 +3,5 @@ matplotlib
 numpy
 pandas
 pillow
+progress
 py-staticmaps[cairo]

@@ -1,6 +1,7 @@
 import argparse
 import gpxpy
 import gpxpy.gpx
+from progress.bar import Bar
 import s2sphere
 import staticmaps
 import sys
@@ -81,12 +82,14 @@ for track in gpx.tracks:
 
         bounds: s2sphere.LatLngRect = s2sphere.LatLngRect.from_point_pair(s2sphere.LatLng.from_degrees(lat_min, lng_min), s2sphere.LatLng.from_degrees(lat_max, lng_max))
         points = []
+        bar = Bar('creating images', max=len(segment.points))
         for point in segment.points:
             count += 1
             latlng = staticmaps.create_latlng(point.latitude, point.longitude)
             points.append(latlng)
             if count > 1:
                 filename = "{0}/{1:06d}.png".format(tmpdir.name, count)
-                print(filename)
                 write_image(points, filename, bounds, args)
+            bar.next()
+        bar.finish()
             
