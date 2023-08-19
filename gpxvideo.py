@@ -41,30 +41,23 @@ gpx = gpxpy.parse(gpx_file)
 tmpdir = tempfile.TemporaryDirectory(prefix='gpx', suffix=args.gpxfile.name)
 print(tmpdir.name)
 
-def write_image(points: list, filename: str, bounds: s2sphere.LatLngRect, args):
-    context = staticmaps.Context()
+context = staticmaps.Context()
 
-    if args.maptype == 'transparent':
-        sys.exit('--maptype transparent not implemented yet')
-    elif args.maptype == 'osm':
-        context.set_tile_provider(staticmaps.tile_provider_OSM)
-    else:
-        sys.exit('invalid maptype')
+if args.maptype == 'transparent':
+    sys.exit('--maptype transparent not implemented yet')
+elif args.maptype == 'osm':
+    context.set_tile_provider(staticmaps.tile_provider_OSM)
+else:
+    sys.exit('invalid maptype')
 
-    if args.trackcolor == 'red':
-        color = (255, 0, 0)
-    elif args.trackcolor == 'green':
-        color = (0, 255, 0)
-    elif args.trackcolor == 'blue':
-        color = (0, 0, 255)
-    else:
-        sys.exit('invalid trackcolor')
-
-    context.add_bounds(bounds)
-    context.add_object(staticmaps.Line(points))
-
-    image = context.render_cairo(args.width, args.height)
-    image.write_to_png(filename)
+if args.trackcolor == 'red':
+    color = (255, 0, 0)
+elif args.trackcolor == 'green':
+    color = (0, 255, 0)
+elif args.trackcolor == 'blue':
+    color = (0, 0, 255)
+else:
+    sys.exit('invalid trackcolor')
 
 count: int = 0
 for track in gpx.tracks:
@@ -84,6 +77,7 @@ for track in gpx.tracks:
                 lng_max = point.longitude
 
         bounds: s2sphere.LatLngRect = s2sphere.LatLngRect.from_point_pair(s2sphere.LatLng.from_degrees(lat_min, lng_min), s2sphere.LatLng.from_degrees(lat_max, lng_max))
+        context.add_bounds(bounds)
         points = []
         ## TODO: Change to proglog
         bar = Bar('creating images', max=len(segment.points))
@@ -92,8 +86,12 @@ for track in gpx.tracks:
             latlng = staticmaps.create_latlng(point.latitude, point.longitude)
             points.append(latlng)
             if count > 1:
+                line = staticmaps.Line(points)
+                context.add_object(line)
                 filename = "{0}/{1:06d}.png".format(tmpdir.name, count)
-                write_image(points, filename, bounds, args)
+                image = context.render_cairo(args.width, args.height)
+                image.write_to_png(filename)
+                context._objects.remove(line)
             bar.next()
         bar.finish()
         image_files = [os.path.join(tmpdir.name,img)
