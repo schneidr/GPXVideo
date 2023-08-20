@@ -4,7 +4,7 @@ This script takes a GPS track from a GPX file and creates a video from it showin
 
 ## Setup
 
-Install prerequesites if needed, see the [Cairo Getting Started Guide](see https://pycairo.readthedocs.io/en/latest/getting_started.html) for more information.
+Install prerequesites if needed, see the [Cairo Getting Started Guide](https://pycairo.readthedocs.io/en/latest/getting_started.html) for more information.
 
     # clone the repository
     git clone git@github.com:schneidr/GPXVideo.git

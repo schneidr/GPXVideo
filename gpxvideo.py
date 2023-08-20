@@ -3,7 +3,7 @@ import gpxpy
 import gpxpy.gpx
 import moviepy.video.io.ImageSequenceClip
 import os
-from progress.bar import Bar
+from proglog import default_bar_logger
 import s2sphere
 import shutil
 import staticmaps
@@ -79,9 +79,8 @@ for track in gpx.tracks:
         bounds: s2sphere.LatLngRect = s2sphere.LatLngRect.from_point_pair(s2sphere.LatLng.from_degrees(lat_min, lng_min), s2sphere.LatLng.from_degrees(lat_max, lng_max))
         context.add_bounds(bounds)
         points = []
-        ## TODO: Change to proglog
-        bar = Bar('creating images', max=len(segment.points))
-        for point in segment.points:
+        progress = default_bar_logger('bar')
+        for point in progress.iter_bar(points=segment.points):
             count += 1
             latlng = staticmaps.create_latlng(point.latitude, point.longitude)
             points.append(latlng)
@@ -92,8 +91,6 @@ for track in gpx.tracks:
                 image = context.render_cairo(args.width, args.height)
                 image.write_to_png(filename)
                 context._objects.remove(line)
-            bar.next()
-        bar.finish()
         image_files = [os.path.join(tmpdir.name,img)
                for img in os.listdir(tmpdir.name)
                if img.endswith(".png")]

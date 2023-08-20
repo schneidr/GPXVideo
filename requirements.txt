@@ -4,5 +4,5 @@ moviepy
 numpy
 pandas
 pillow
-progress
+proglog
 py-staticmaps[cairo]
