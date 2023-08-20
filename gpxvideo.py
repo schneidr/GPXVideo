@@ -2,10 +2,8 @@ import argparse
 import gpxpy
 import gpxpy.gpx
 import moviepy.video.io.ImageSequenceClip
-import os
 from proglog import default_bar_logger
 import re
-import s2sphere
 import shutil
 import staticmaps
 import sys
