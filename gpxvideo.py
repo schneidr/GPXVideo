@@ -71,6 +71,7 @@ for track in gpx.tracks:
         
         points: list = []
         image_files: list = []
+        print("Creating image files ...")
         progress = default_bar_logger('bar')
         for point in progress.iter_bar(points=segment.points):
             count += 1
@@ -79,11 +80,14 @@ for track in gpx.tracks:
             if count > 1:
                 line = staticmaps.Line(points)
                 context.add_object(line)
+                marker = staticmaps.ImageMarker(latlng, "marker_dot.png", origin_x=5, origin_y=5)
+                context.add_object(marker)
                 filename = "{0}/{1:06d}.png".format(tmpdir.name, count)
                 image = context.render_cairo(args.width, args.height)
                 image.write_to_png(filename)
                 image_files.append(filename)
                 context._objects.remove(line)
+                context._objects.remove(marker)
         clip = moviepy.video.io.ImageSequenceClip.ImageSequenceClip(image_files, fps=args.fps)
         clip.write_videofile(re.sub(r'.gpx$', '.mp4', args.gpxfile.name), logger='bar')
         shutil.rmtree(tmpdir.name)

@@ -4,5 +4,4 @@ share/*
 pyvenv.cfg
 __pycache__/*
 *.gpx
-*.png
 *.mp4
