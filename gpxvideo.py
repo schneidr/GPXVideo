@@ -63,22 +63,14 @@ else:
 count: int = 0
 for track in gpx.tracks:
     for segment in track.segments:
-        lat_min: float = 99
-        lng_min: float = 99
-        lat_max: float = -99
-        lng_max: float = -99
-        for point in segment.points:
-            if point.latitude < lat_min:
-                lat_min = point.latitude
-            if point.longitude < lng_min:
-                lng_min = point.longitude
-            if point.latitude > lat_max:
-                lat_max = point.latitude
-            if point.longitude > lng_max:
-                lng_max = point.longitude
-
-        bounds: s2sphere.LatLngRect = s2sphere.LatLngRect.from_point_pair(s2sphere.LatLng.from_degrees(lat_min, lng_min), s2sphere.LatLng.from_degrees(lat_max, lng_max))
-        context.add_bounds(bounds)
+        bounds = staticmaps.Area(
+                [staticmaps.create_latlng(point.latitude, point.longitude) for point in segment.points],
+                fill_color=staticmaps.TRANSPARENT,
+                width=2,
+                color=staticmaps.TRANSPARENT,
+            )
+        context.add_object(bounds)
+        
         points: list = []
         image_files: list = []
         progress = default_bar_logger('bar')
