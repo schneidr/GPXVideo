@@ -25,10 +25,10 @@ parser.add_argument('--fps', type=int,
                     default=30)
 parser.add_argument('--trackwidth', type=int,
                     help='Width of the track',
-                    default=10)
+                    default=2)
 parser.add_argument('--trackcolor', choices=['red', 'green', 'blue'],
                     help='Color of the track',
-                    default='blue')
+                    default='red')
 parser.add_argument('--maptype', choices=['transparent', 'osm'],
                     help='Map style to use for the background',
                     default='osm')
@@ -78,7 +78,7 @@ for track in gpx.tracks:
             latlng = staticmaps.create_latlng(point.latitude, point.longitude)
             points.append(latlng)
             if count > 1:
-                line = staticmaps.Line(points)
+                line = staticmaps.Line(points, color=color, width=args.trackwidth)
                 context.add_object(line)
                 marker = staticmaps.ImageMarker(latlng, "marker_dot.png", origin_x=5, origin_y=5)
                 context.add_object(marker)
