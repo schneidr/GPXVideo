@@ -38,7 +38,6 @@ gpx_file = open(args.gpxfile.name, 'r')
 gpx = gpxpy.parse(gpx_file)
 
 tmpdir = tempfile.TemporaryDirectory(prefix='gpx', suffix=args.gpxfile.name)
-print(tmpdir.name)
 
 context = staticmaps.Context()
 
@@ -50,11 +49,11 @@ else:
     sys.exit('invalid maptype')
 
 if args.trackcolor == 'red':
-    color = (255, 0, 0)
+    color = staticmaps.RED
 elif args.trackcolor == 'green':
-    color = (0, 255, 0)
+    color = staticmaps.GREEN
 elif args.trackcolor == 'blue':
-    color = (0, 0, 255)
+    color = staticmaps.BLUE
 else:
     sys.exit('invalid trackcolor')
 
