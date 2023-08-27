@@ -25,8 +25,9 @@ parser.add_argument('--fps', type=int,
                     default=30)
 parser.add_argument('--trackwidth', type=int,
                     help='Width of the track',
-                    default=2)
-parser.add_argument('--trackcolor', choices=['red', 'green', 'blue'],
+                    default=3)
+parser.add_argument('--trackcolor', choices=['black', 'blue', 'brown', 'green', 'orange', 'purple',
+                                             'red', 'white', 'yellow'],
                     help='Color of the track',
                     default='red')
 parser.add_argument('--maptype', choices=['transparent', 'osm'],
@@ -48,12 +49,24 @@ elif args.maptype == 'osm':
 else:
     sys.exit('invalid maptype')
 
-if args.trackcolor == 'red':
-    color = staticmaps.RED
-elif args.trackcolor == 'green':
-    color = staticmaps.GREEN
+if args.trackcolor == 'black':
+    color = staticmaps.BLACK
 elif args.trackcolor == 'blue':
     color = staticmaps.BLUE
+elif args.trackcolor == 'brown':
+    color = staticmaps.BROWN
+elif args.trackcolor == 'green':
+    color = staticmaps.GREEN
+elif args.trackcolor == 'red':
+    color = staticmaps.RED
+elif args.trackcolor == 'orange':
+    color = staticmaps.ORANGE
+elif args.trackcolor == 'purple':
+    color = staticmaps.PURPLE
+elif args.trackcolor == 'white':
+    color = staticmaps.WHITE
+elif args.trackcolor == 'yellow':
+    color = staticmaps.YELLOW
 else:
     sys.exit('invalid trackcolor')
 
@@ -77,6 +90,8 @@ for track in gpx.tracks:
             latlng = staticmaps.create_latlng(point.latitude, point.longitude)
             points.append(latlng)
             if count > 1:
+                outline = staticmaps.Line(points, color=staticmaps.BLACK, width=(args.trackwidth+1))
+                context.add_object(outline)
                 line = staticmaps.Line(points, color=color, width=args.trackwidth)
                 context.add_object(line)
                 marker = staticmaps.ImageMarker(latlng, "marker_dot.png", origin_x=5, origin_y=5)
@@ -87,6 +102,7 @@ for track in gpx.tracks:
                 image_files.append(filename)
                 context._objects.remove(line)
                 context._objects.remove(marker)
+                context._objects.remove(outline)
         clip = moviepy.video.io.ImageSequenceClip.ImageSequenceClip(image_files, fps=args.fps)
         clip.write_videofile(re.sub(r'.gpx$', '.mp4', args.gpxfile.name), logger='bar')
         shutil.rmtree(tmpdir.name)
