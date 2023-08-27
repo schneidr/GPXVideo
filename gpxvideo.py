@@ -30,7 +30,7 @@ parser.add_argument('--trackcolor', choices=['black', 'blue', 'brown', 'green', 
                                              'red', 'white', 'yellow'],
                     help='Color of the track',
                     default='red')
-parser.add_argument('--maptype', choices=['transparent', 'osm'],
+parser.add_argument('--maptype', choices=['none', 'osm'],
                     help='Map style to use for the background',
                     default='osm')
 args = parser.parse_args()
@@ -42,8 +42,9 @@ tmpdir = tempfile.TemporaryDirectory(prefix='gpx', suffix=args.gpxfile.name)
 
 context = staticmaps.Context()
 
-if args.maptype == 'transparent':
-    sys.exit('--maptype transparent not implemented yet')
+if args.maptype == 'none':
+    context.set_tile_provider(staticmaps.tile_provider_None)
+    # sys.exit('--maptype transparent not implemented yet')
 elif args.maptype == 'osm':
     context.set_tile_provider(staticmaps.tile_provider_OSM)
 else:
@@ -76,7 +77,7 @@ for track in gpx.tracks:
         bounds = staticmaps.Area(
                 [staticmaps.create_latlng(point.latitude, point.longitude) for point in segment.points],
                 fill_color=staticmaps.TRANSPARENT,
-                width=2,
+                width=args.trackwidth,
                 color=staticmaps.TRANSPARENT,
             )
         context.add_object(bounds)
