@@ -10,7 +10,6 @@ import sys
 import tempfile
 
 parser = argparse.ArgumentParser(description='Create Video from GPX file')
-# https://docs.python.org/3/library/argparse.html
 parser.add_argument('--gpxfile', type=argparse.FileType('r'),
                     help='GPX file',
                     required=True)
@@ -44,7 +43,6 @@ context = staticmaps.Context()
 
 if args.maptype == 'none':
     context.set_tile_provider(staticmaps.tile_provider_None)
-    # sys.exit('--maptype transparent not implemented yet')
 elif args.maptype == 'osm':
     context.set_tile_provider(staticmaps.tile_provider_OSM)
 else:
