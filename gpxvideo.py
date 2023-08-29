@@ -77,7 +77,7 @@ for track in gpx.tracks:
         bounds = staticmaps.Area(
                 [staticmaps.create_latlng(point.latitude, point.longitude) for point in segment.points],
                 fill_color=staticmaps.TRANSPARENT,
-                width=args.trackwidth,
+                width=(args.trackwidth+15),
                 color=staticmaps.TRANSPARENT,
             )
         context.add_object(bounds)
