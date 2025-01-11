@@ -70,6 +70,8 @@ else:
     sys.exit('invalid trackcolor')
 
 count: int = 0
+points: list = []
+image_files: list = []
 for track in gpx.tracks:
     for segment in track.segments:
         bounds = staticmaps.Area(
@@ -80,8 +82,8 @@ for track in gpx.tracks:
             )
         context.add_object(bounds)
         
-        points: list = []
-        image_files: list = []
+for track in gpx.tracks:
+    for segment in track.segments:
         print("Creating image files ...")
         progress = default_bar_logger('bar')
         for point in progress.iter_bar(points=segment.points):
@@ -102,6 +104,6 @@ for track in gpx.tracks:
                 context._objects.remove(line)
                 context._objects.remove(marker)
                 context._objects.remove(outline)
-        clip = moviepy.video.io.ImageSequenceClip.ImageSequenceClip(image_files, fps=args.fps)
-        clip.write_videofile(re.sub(r'.gpx$', '.mp4', args.gpxfile.name), logger='bar')
-        shutil.rmtree(tmpdir.name)
+clip = moviepy.video.io.ImageSequenceClip.ImageSequenceClip(image_files, fps=args.fps)
+clip.write_videofile(re.sub(r'.gpx$', '.mp4', args.gpxfile.name), logger='bar')
+shutil.rmtree(tmpdir.name)
